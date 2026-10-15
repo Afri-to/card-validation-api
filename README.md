@@ -1,6 +1,6 @@
 # Card Validation API
 
-![tests](https://github.com/YOUR-GITHUB-USERNAME/card-validation-api/actions/workflows/tests.yml/badge.svg)
+![tests](https://github.com/Afri-to/card-validation-api/actions/workflows/tests.yml/badge.svg)
 
 A REST API that validates payment card numbers with the Luhn (MOD 10) algorithm, detects the card brand, and records masked mock transactions. It uses **public test card numbers and fake data only**.
 
