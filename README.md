@@ -77,8 +77,17 @@ Then open http://127.0.0.1:8000/docs for the interactive API docs.
 ## Run the tests
 
 ```bash
-pytest -v
+pytest -v --cov=app
 ```
+
+| Kind | What it covers |
+|---|---|
+| Unit | Luhn check, brand detection, validation, business rules |
+| Integration | Every endpoint against a real PostgreSQL test database, emptied between tests |
+| Database | Check constraints reject bad rows even if API code is bypassed |
+| End-to-end | Validate → pay → duplicate flagged → reviewer opens it |
+
+CI runs the full suite against a PostgreSQL service container on every push and fails if coverage drops below 90%.
 
 ## Roadmap
 
@@ -88,6 +97,6 @@ pytest -v
 - [x] `POST /validate` with error codes
 - [x] PostgreSQL transactions table and endpoints
 - [x] Business rules (negative amounts, over-limit declines, duplicate detection)
-- [ ] Integration tests against a test database
+- [x] Integration tests against a test database
 - [ ] Docker and docker-compose
 - [ ] Live deployment
