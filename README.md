@@ -8,7 +8,7 @@ A REST API that validates payment card numbers with the Luhn (MOD 10) algorithm,
 
 ## Tech stack
 
-Python 3.12 · FastAPI · pytest · GitHub Actions
+Python 3.12 · FastAPI · PostgreSQL · SQLAlchemy · pytest · GitHub Actions
 
 ## Example
 
@@ -38,6 +38,15 @@ curl -X POST http://127.0.0.1:8000/validate \
 | `INVALID_LENGTH` | Right brand prefix, wrong number of digits |
 | `LUHN_CHECK_FAILED` | Checksum fails, usually a typo |
 
+### Transactions
+
+| Method | Path | What it does |
+|---|---|---|
+| `POST` | `/transactions` | Validates the card and records a mock transaction (201). An invalid card returns 422 with the error codes above. |
+| `GET` | `/transactions` | Lists transactions, newest first. Filters: `status`, `from`, `to` (ISO dates), `limit` (1–100), `offset`. |
+
+Only the masked card (`**** 1111`) and brand are stored. The full number is never written to the database.
+
 A number that fails validation still returns HTTP 200 with `valid: false`; a malformed request returns 422. The full card number is never returned, only the last 4 digits.
 
 ## Run it locally
@@ -48,6 +57,8 @@ source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements-dev.txt
 uvicorn app.main:app --reload
 ```
+
+You need PostgreSQL running locally with databases named `cards` and `cards_test`. Set `DATABASE_URL` (and `TEST_DATABASE_URL` for tests) if your connection details differ from `postgresql+psycopg://postgres:postgres@localhost:5432/cards`.
 
 Then open http://127.0.0.1:8000/docs for the interactive API docs.
 
@@ -63,7 +74,7 @@ pytest -v
 - [x] Luhn check with unit tests
 - [x] Card-brand detection
 - [x] `POST /validate` with error codes
-- [ ] PostgreSQL transactions table and endpoints
+- [x] PostgreSQL transactions table and endpoints
 - [ ] Business rules (negative amounts, duplicate detection)
 - [ ] Integration tests against a test database
 - [ ] Docker and docker-compose

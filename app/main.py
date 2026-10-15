@@ -1,9 +1,20 @@
 """Card Validation API: entry point."""
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
+from app.db import init_db
 from app.schemas import ErrorDetail, ValidateRequest, ValidateResponse
+from app.transactions import router as transactions_router
 from app.validation import MESSAGES, validate_card
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    init_db()
+    yield
+
 
 app = FastAPI(
     title="Card Validation API",
@@ -11,8 +22,10 @@ app = FastAPI(
         "Validates test payment card numbers and records mock transactions. "
         "Use public test card numbers only."
     ),
-    version="0.1.0",
+    version="0.2.0",
+    lifespan=lifespan,
 )
+app.include_router(transactions_router)
 
 
 @app.get("/health")
