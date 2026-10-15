@@ -31,7 +31,7 @@ pytest -v
 
 - [x] FastAPI app with `/health` and CI
 - [x] Luhn check with unit tests
-- [ ] Card-brand detection
+- [x] Card-brand detection
 - [ ] `POST /validate` with error codes
 - [ ] PostgreSQL transactions table and endpoints
 - [ ] Business rules (negative amounts, duplicate detection)
