@@ -91,3 +91,75 @@ def test_limit_and_offset(client):
     assert len(client.get("/transactions?limit=2&offset=4").json()) == 1
     assert client.get("/transactions?limit=0").status_code == 422
     assert client.get("/transactions?limit=101").status_code == 422
+
+
+# --- Business rules (step 6) ----------------------------------------------
+
+
+def age_all_transactions(seconds):
+    with engine.begin() as conn:
+        conn.execute(
+            text("UPDATE transactions SET created_at = created_at - make_interval(secs => :s)"),
+            {"s": seconds},
+        )
+
+
+def test_zero_and_negative_amounts_are_rejected(client):
+    assert create(client, amount="0").status_code == 422
+    assert create(client, amount="-5.00").status_code == 422
+    assert client.get("/transactions").json() == []
+
+
+def test_over_limit_is_recorded_as_declined(client):
+    response = create(client, amount="10000.01")
+    assert response.status_code == 201
+    assert response.json()["status"] == "declined"
+    assert response.json()["reason"] == "OVER_LIMIT"
+
+
+def test_repeat_within_60_seconds_is_flagged(client):
+    assert create(client).json()["status"] == "approved"
+    second = create(client).json()
+    assert second["status"] == "flagged"
+    assert second["reason"] == "POSSIBLE_DUPLICATE"
+
+
+def test_same_card_with_different_formatting_is_still_a_duplicate(client):
+    create(client, card="4111111111111111")
+    assert create(client, card="4111-1111-1111-1111").json()["status"] == "flagged"
+
+
+def test_repeat_after_60_seconds_is_approved(client):
+    create(client)
+    age_all_transactions(61)
+    assert create(client).json()["status"] == "approved"
+
+
+def test_different_amount_currency_or_card_is_not_a_duplicate(client):
+    create(client)
+    assert create(client, amount="26.00").json()["status"] == "approved"
+    assert create(client, currency="EUR").json()["status"] == "approved"
+    assert create(client, card="4242424242424242").json()["status"] == "approved"
+
+
+def test_get_by_id(client):
+    created = create(client).json()
+    response = client.get(f"/transactions/{created['id']}")
+    assert response.status_code == 200
+    assert response.json() == created
+
+
+def test_get_unknown_id_returns_404(client):
+    response = client.get("/transactions/00000000-0000-0000-0000-000000000000")
+    assert response.status_code == 404
+
+
+def test_get_malformed_id_returns_422(client):
+    assert client.get("/transactions/not-a-uuid").status_code == 422
+
+
+def test_filter_flagged(client):
+    create(client)
+    create(client)
+    flagged = client.get("/transactions?status=flagged").json()
+    assert len(flagged) == 1

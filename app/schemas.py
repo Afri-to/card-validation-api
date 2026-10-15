@@ -33,7 +33,9 @@ class ValidateResponse(BaseModel):
 
 class TransactionCreate(BaseModel):
     card_number: str = Field(..., max_length=64, examples=["4111 1111 1111 1111"])
-    amount: Decimal = Field(..., max_digits=12, decimal_places=2, examples=["25.00"])
+    amount: Decimal = Field(
+        ..., gt=0, max_digits=12, decimal_places=2, examples=["25.00"]
+    )
     currency: str = Field(..., pattern=r"^[A-Z]{3}$", examples=["USD"])
 
 
@@ -46,4 +48,7 @@ class TransactionOut(BaseModel):
     amount: Decimal
     currency: str
     status: TransactionStatus
+    reason: str | None = Field(
+        None, description="Why a transaction was declined or flagged."
+    )
     created_at: datetime

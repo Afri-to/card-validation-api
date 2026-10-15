@@ -44,6 +44,18 @@ curl -X POST http://127.0.0.1:8000/validate \
 |---|---|---|
 | `POST` | `/transactions` | Validates the card and records a mock transaction (201). An invalid card returns 422 with the error codes above. |
 | `GET` | `/transactions` | Lists transactions, newest first. Filters: `status`, `from`, `to` (ISO dates), `limit` (1–100), `offset`. |
+| `GET` | `/transactions/{id}` | One transaction, or 404. |
+
+### Business rules
+
+| Situation | Result |
+|---|---|
+| Amount is zero or negative | 422, nothing recorded |
+| Amount over the mock limit (10,000.00) | Recorded as `declined`, reason `OVER_LIMIT` |
+| Same card, amount and currency within 60 seconds | Recorded as `flagged`, reason `POSSIBLE_DUPLICATE` |
+| Otherwise | Recorded as `approved` |
+
+Duplicate detection compares an HMAC-SHA256 **fingerprint** of the card number instead of the number itself. The same card always gives the same fingerprint, but the number can't be recovered from the database without the secret key (`CARD_FINGERPRINT_KEY`). The limit and window are configurable through `MAX_APPROVED_AMOUNT` and `DUPLICATE_WINDOW_SECONDS`.
 
 Only the masked card (`**** 1111`) and brand are stored. The full number is never written to the database.
 
@@ -75,7 +87,7 @@ pytest -v
 - [x] Card-brand detection
 - [x] `POST /validate` with error codes
 - [x] PostgreSQL transactions table and endpoints
-- [ ] Business rules (negative amounts, duplicate detection)
+- [x] Business rules (negative amounts, over-limit declines, duplicate detection)
 - [ ] Integration tests against a test database
 - [ ] Docker and docker-compose
 - [ ] Live deployment
