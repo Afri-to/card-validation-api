@@ -34,3 +34,25 @@ jobs:
           cache-dependency-path: requirements-dev.txt
       - run: pip install -r requirements-dev.txt
       - run: pytest -v --cov=app --cov-report=term-missing --cov-fail-under=90
+
+  docker:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and start the stack
+        run: docker compose up --build --detach --wait --wait-timeout 120
+      - name: Smoke test the running container
+        run: |
+          curl --fail --silent http://localhost:8000/health
+          curl --fail --silent -X POST http://localhost:8000/transactions \
+            -H "Content-Type: application/json" \
+            -d '{"card_number": "4111 1111 1111 1111", "amount": "10.00", "currency": "USD"}' \
+            | grep '"status":"approved"'
+          curl --fail --silent "http://localhost:8000/transactions?status=approved" | grep '\*\*\*\* 1111'
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs
+      - name: Stop the stack
+        if: always()
+        run: docker compose down --volumes

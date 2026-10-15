@@ -8,7 +8,7 @@ A REST API that validates payment card numbers with the Luhn (MOD 10) algorithm,
 
 ## Tech stack
 
-Python 3.12 · FastAPI · PostgreSQL · SQLAlchemy · pytest · GitHub Actions
+Python 3.12 · FastAPI · PostgreSQL · SQLAlchemy · pytest · Docker · GitHub Actions
 
 ## Example
 
@@ -61,7 +61,15 @@ Only the masked card (`**** 1111`) and brand are stored. The full number is neve
 
 A number that fails validation still returns HTTP 200 with `valid: false`; a malformed request returns 422. The full card number is never returned, only the last 4 digits.
 
-## Run it locally
+## Run it with Docker (easiest)
+
+```bash
+docker compose up --build
+```
+
+This starts the API and a PostgreSQL database. Open http://localhost:8000/docs. Stop it with `Ctrl+C`, or `docker compose down --volumes` to also delete the data.
+
+## Run it without Docker
 
 ```bash
 python -m venv .venv
@@ -98,5 +106,5 @@ CI runs the full suite against a PostgreSQL service container on every push and 
 - [x] PostgreSQL transactions table and endpoints
 - [x] Business rules (negative amounts, over-limit declines, duplicate detection)
 - [x] Integration tests against a test database
-- [ ] Docker and docker-compose
+- [x] Docker and docker-compose
 - [ ] Live deployment
