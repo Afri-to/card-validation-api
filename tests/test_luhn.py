@@ -109,3 +109,7 @@ def test_normalize_strips_spaces_and_dashes():
 
 def test_normalize_returns_none_for_non_digits():
     assert normalize_number("4111x") is None
+
+
+def test_normalize_returns_empty_string_for_blank_input():
+    assert normalize_number(" - ") == ""

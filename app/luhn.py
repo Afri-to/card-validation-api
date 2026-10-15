@@ -15,6 +15,8 @@ def normalize_number(raw: str) -> str | None:
     if not isinstance(raw, str):
         raise TypeError(f"card number must be a string, got {type(raw).__name__}")
     digits = "".join(ch for ch in raw if ch not in SEPARATORS)
+    if digits == "":
+        return ""  # empty is its own case, not "bad characters"
     # isascii() matters: "٣".isdigit() is True, but it is not a card digit.
     if not digits.isascii() or not digits.isdigit():
         return None
