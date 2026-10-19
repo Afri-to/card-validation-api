@@ -5,7 +5,7 @@
 A REST API that validates payment card numbers with the Luhn (MOD 10) algorithm, detects the card brand, and records masked mock transactions. It uses **public test card numbers and fake data only**.
 
 **Live API docs:** https://card-validation-api-h8lt.onrender.com/docs
-(free hosting: the first request after 15 idle minutes can take about a minute while the server wakes up)
+(the first request after 15 idle minutes can take about a minute while the server wakes up)
 
 ## Tech stack
 
