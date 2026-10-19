@@ -3,6 +3,7 @@
 from decimal import Decimal
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -20,6 +21,19 @@ class Settings(BaseSettings):
 
     # Same card, amount and currency within this window is flagged as a duplicate.
     duplicate_window_seconds: int = 60
+
+    @field_validator("database_url")
+    @classmethod
+    def use_psycopg_driver(cls, url: str) -> str:
+        """Hosts like Neon and Render hand out postgres:// or postgresql:// URLs.
+
+        SQLAlchemy needs the driver named explicitly (postgresql+psycopg://),
+        so rewrite the scheme instead of making people edit the URL by hand.
+        """
+        for prefix in ("postgres://", "postgresql://"):
+            if url.startswith(prefix):
+                return "postgresql+psycopg://" + url[len(prefix) :]
+        return url
 
 
 @lru_cache

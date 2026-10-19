@@ -1,0 +1,15 @@
+# Render Blueprint: deploys the API from the Dockerfile on Render's free plan.
+# The database is hosted separately (Neon free tier), so DATABASE_URL is
+# entered once in the Render dashboard and never committed to the repo.
+services:
+  - type: web
+    name: card-validation-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: CARD_FINGERPRINT_KEY
+        generateValue: true

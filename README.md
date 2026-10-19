@@ -61,6 +61,16 @@ Only the masked card (`**** 1111`) and brand are stored. The full number is neve
 
 A number that fails validation still returns HTTP 200 with `valid: false`; a malformed request returns 422. The full card number is never returned, only the last 4 digits.
 
+## Deploy
+
+The API runs on [Render](https://render.com)'s free plan from the `Dockerfile`, and the database is a free [Neon](https://neon.tech) Postgres. Neon was chosen because Render's free database expires after 30 days, while Neon's free plan doesn't expire.
+
+1. Create a Neon project and copy its connection string.
+2. In Render, choose **New → Blueprint** and select this repository. Render reads `render.yaml`.
+3. Paste the Neon connection string as `DATABASE_URL`. `CARD_FINGERPRINT_KEY` is generated automatically.
+
+Every push to `main` redeploys. Free services sleep after 15 minutes without traffic, so the first request after a quiet period can take about a minute.
+
 ## Run it with Docker (easiest)
 
 ```bash
