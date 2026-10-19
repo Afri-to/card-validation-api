@@ -4,7 +4,8 @@
 
 A REST API that validates payment card numbers with the Luhn (MOD 10) algorithm, detects the card brand, and records masked mock transactions. It uses **public test card numbers and fake data only**.
 
-> Status: in progress. See the roadmap below.
+**Live API docs:** https://card-validation-api-h8lt.onrender.com/docs
+(free hosting: the first request after 15 idle minutes can take about a minute while the server wakes up)
 
 ## Tech stack
 
@@ -117,4 +118,4 @@ CI runs the full suite against a PostgreSQL service container on every push and 
 - [x] Business rules (negative amounts, over-limit declines, duplicate detection)
 - [x] Integration tests against a test database
 - [x] Docker and docker-compose
-- [ ] Live deployment
+- [x] Live deployment (Render + Neon Postgres)
