@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Card Validation API</title>
+  <meta name="description" content="Check a test card number with the Luhn algorithm, see its brand, and try a mock payment.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap top-inner">
+      <a class="name" href="/">Card Validation API</a>
+      <nav aria-label="Links">
+        <a href="/docs">API docs</a>
+        <a href="https://github.com/Afri-to/card-validation-api">Source on GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <p id="wake" class="wake" hidden role="status">Starting the server. The first request after a quiet period takes up to a minute.</p>
+
+    <section class="check" aria-labelledby="check-title">
+      <div class="check-intro">
+        <h1 id="check-title">Check a card number</h1>
+        <p class="lede">Type a number or pick a test card. The check runs on the server as you type, and the full number is never stored.</p>
+      </div>
+
+      <div class="check-grid">
+        <div>
+          <div class="card" id="card" data-brand="" data-state="empty" aria-hidden="true">
+            <div class="card-top">
+              <span class="chip"></span>
+              <span class="card-brand" id="card-brand">Card</span>
+            </div>
+            <div class="card-number" id="card-number">•••• •••• •••• ••••</div>
+            <div class="card-bottom">
+              <span>TEST CARD</span>
+              <span class="card-verdict" id="card-verdict"></span>
+            </div>
+          </div>
+
+          <label class="field-label" for="number">Card number</label>
+          <input id="number" class="number-input" inputmode="numeric" autocomplete="off" spellcheck="false"
+                 placeholder="4111 1111 1111 1111" maxlength="23" aria-describedby="result">
+
+          <div class="samples" role="group" aria-label="Test cards">
+            <button type="button" data-num="4111111111111111">Visa</button>
+            <button type="button" data-num="5555555555554444">Mastercard</button>
+            <button type="button" data-num="378282246310005">Amex</button>
+            <button type="button" data-num="6011111111111117">Discover</button>
+            <button type="button" data-num="4111111111111112">Visa with a typo</button>
+          </div>
+        </div>
+
+        <div class="explain">
+          <div id="result" class="result" aria-live="polite">
+            <p class="result-empty">Results appear here.</p>
+          </div>
+
+          <details class="luhn" id="luhn" open>
+            <summary>How the Luhn check works on this number</summary>
+            <p class="luhn-help">From the right, every second digit is doubled. If doubling gives more than 9, subtract 9. The number is valid when the total is a multiple of 10.</p>
+            <ol class="luhn-digits" id="luhn-digits" aria-label="Digits after the Luhn step"></ol>
+            <p class="luhn-total" id="luhn-total"></p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="pay" aria-labelledby="pay-title">
+      <div class="pay-form">
+        <h2 id="pay-title">Try a mock payment</h2>
+        <p class="lede">Uses the card above. Send the same payment twice within 60 seconds and the second one is flagged as a possible duplicate. Amounts over 10,000 are declined.</p>
+        <form id="pay-form" novalidate>
+          <div class="row">
+            <div>
+              <label class="field-label" for="amount">Amount</label>
+              <input id="amount" inputmode="decimal" value="25.00" required>
+            </div>
+            <div>
+              <label class="field-label" for="currency">Currency</label>
+              <select id="currency">
+                <option>USD</option><option>EUR</option><option>GBP</option><option>CAD</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="primary" id="pay-btn">Send payment</button>
+          <p id="pay-result" class="pay-result" aria-live="polite"></p>
+        </form>
+      </div>
+
+      <div class="history">
+        <div class="history-head">
+          <h2>Recent payments</h2>
+          <div class="filter" role="group" aria-label="Filter by status">
+            <button type="button" data-status="" aria-pressed="true">All</button>
+            <button type="button" data-status="approved" aria-pressed="false">Approved</button>
+            <button type="button" data-status="flagged" aria-pressed="false">Flagged</button>
+            <button type="button" data-status="declined" aria-pressed="false">Declined</button>
+          </div>
+        </div>
+        <ul class="tx-list" id="tx-list" aria-live="polite"></ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    <p>Demo with public test card numbers only. Built with FastAPI, PostgreSQL and Docker by José M. Alicea Rivera.</p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
